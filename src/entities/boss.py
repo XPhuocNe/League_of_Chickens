@@ -352,11 +352,6 @@ class Boss:
             frame = strip[self._frame_idx % len(strip)]
             if self._facing < 0:
                 frame = pygame.transform.flip(frame, True, False)
-            if self.hit_flash > 0:
-                frame = frame.copy()
-                white = pygame.Surface(frame.get_size(), pygame.SRCALPHA)
-                white.fill((255, 255, 255, 180))
-                frame.blit(white, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
             fw, fh = frame.get_size()
             surface.blit(frame, (int(sx) - fw // 2, int(sy) - fh // 2))
         else:
@@ -364,6 +359,15 @@ class Boss:
             pygame.draw.circle(surface, color, (int(sx), int(sy)), self.radius)
             pygame.draw.circle(surface, (220, 100, 255), (int(sx), int(sy)), self.radius // 2)
             pygame.draw.circle(surface, (255, 255, 255), (int(sx), int(sy)), self.radius // 4)
+
+        # Hit flash: vòng tròn trắng bán trong suốt đúng với hitbox, không đè lên sprite
+        if self.hit_flash > 0:
+            alpha   = int(180 * (self.hit_flash / 0.15))   # mờ dần theo thời gian
+            flash_r = self.radius                           # = 120, khớp hitbox
+            f_surf  = pygame.Surface((flash_r * 2, flash_r * 2), pygame.SRCALPHA)
+            pygame.draw.circle(f_surf, (255, 255, 255, alpha),
+                               (flash_r, flash_r), flash_r)
+            surface.blit(f_surf, (int(sx) - flash_r, int(sy) - flash_r))
 
         # Thanh máu + nhãn
         bar_w     = self.radius * 2 + 20
